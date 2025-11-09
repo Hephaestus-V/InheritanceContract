@@ -72,10 +72,10 @@ contract Inheritance {
      */
     function setHeir(address newHeir) external onlyOwner {
         if (newHeir == address(0) || newHeir == owner) revert InvalidHeirAddress();
-        
+
         address previousHeir = heir;
         heir = payable(newHeir);
-        
+
         emit HeirUpdated(previousHeir, newHeir);
     }
 
@@ -87,13 +87,13 @@ contract Inheritance {
     function withdraw(uint256 amount) external onlyOwner nonReentrant {
         // Check if contract has sufficient balance
         if (amount > address(this).balance) revert InsufficientBalance();
-        
+
         // Reset the withdrawal timer
         lastWithdrawal = block.timestamp;
-        
+
         // Only transfer if amount is non-zero
         if (amount > 0) {
-            (bool success, ) = owner.call{value: amount}("");
+            (bool success,) = owner.call{value: amount}("");
             if (!success) revert TransferFailed();
             emit Withdrawn(owner, amount);
         }
@@ -108,17 +108,17 @@ contract Inheritance {
     function claimOwnership(address newHeir) external onlyHeir {
         // Verify enough time has passed since last withdrawal
         if (block.timestamp < lastWithdrawal + INACTIVITY_PERIOD) revert OwnerStillActive();
-        
+
         // Prevent setting invalid heir (prevents self inheritance)
         if (newHeir == address(0) || newHeir == msg.sender) revert InvalidHeirAddress();
-        
+
         address previousOwner = owner;
-        
+
         // Transfer ownership to heir
         owner = payable(msg.sender); // msg.sender is heir
         heir = payable(newHeir); // Set new heir to continue the chain
         lastWithdrawal = block.timestamp; // Reset timer for new owner
-        
+
         emit OwnershipTransferred(previousOwner, msg.sender);
         emit HeirUpdated(msg.sender, newHeir);
     }
