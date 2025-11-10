@@ -8,11 +8,11 @@ contract DeployInheritance is Script {
     function run() external returns (Inheritance) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address heir = vm.envAddress("HEIR_ADDRESS");
-        
+
         vm.startBroadcast(deployerPrivateKey);
         Inheritance inheritance = new Inheritance(heir);
         vm.stopBroadcast();
-        
+
         return inheritance;
     }
 }
