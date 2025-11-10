@@ -1,66 +1,35 @@
-## Foundry
+# Inheritance Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Inheritance contract that allows an owner to designate an heir who can claim ownership of the contract and its ETH balance if the owner fails to withdraw funds for 30 consecutive days.
 
-Foundry consists of:
+## Key Features
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- **30-Day Inactivity Period**: Heir can claim ownership after owner hasn't withdrawn for 30 days
+- **Heartbeat Mechanism**: Owner can withdraw 0 ETH to reset the timer without moving funds
+- **Heir Management**: Owner can update the designated heir at any time
+- **Security First**: Includes reentrancy protection and prevents self-inheritance
+- **Inheritance Chain**: New owner must designate a new heir to continue the inheritance mechanism
 
-## Documentation
+## How It Works
 
-https://book.getfoundry.sh/
+1. **Deployment**: Contract is deployed with an initial heir address
+2. **Normal Operation**: Owner withdraws ETH as needed (resets the 30-day timer)
+3. **Inactivity**: If owner doesn't withdraw for 30+ days, heir can claim ownership
+4. **Ownership Transfer**: Heir becomes the new owner and must set a new heir
 
-## Usage
+## Core Functions
 
-### Build
+### Owner Functions
 
-```shell
-$ forge build
-```
+- `withdraw(uint256 amount)` - Withdraw ETH (0 amount = heartbeat)
+- `setHeir(address newHeir)` - Update the designated heir
 
-### Test
+### Heir Functions
 
-```shell
-$ forge test
-```
+- `claimOwnership(address newHeir)` - Claim ownership after 30 days of owner inactivity
 
-### Format
+### View Functions
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- `getBalance()` - Returns contract ETH balance
+- `getTimeUntilClaimable()` - Returns seconds until heir can claim
+- `canHeirClaim()` - Returns true if heir can currently claim ownership
